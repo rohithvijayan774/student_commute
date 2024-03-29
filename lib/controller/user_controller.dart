@@ -1,0 +1,163 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:student_commute/view/user/user_about_us.dart';
+import 'package:student_commute/view/user/user_call_support.dart';
+import 'package:student_commute/view/user/user_change_password.dart';
+import 'package:student_commute/view/user/user_complaint_registration.dart';
+import 'package:student_commute/view/user/user_complaint_request.dart';
+import 'package:student_commute/view/user/user_fare_details.dart';
+import 'package:student_commute/view/user/user_home.dart';
+import 'package:student_commute/view/user/user_notifications.dart';
+import 'package:student_commute/view/user/user_tickets.dart';
+
+class UserController extends ChangeNotifier {
+  FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+
+  TextEditingController loginEmailController = TextEditingController();
+  TextEditingController loginPasswordController = TextEditingController();
+
+  List carouselList = [
+    'assets/Bus1.png',
+    'assets/Bus2.png',
+  ];
+
+  List<Map<String, dynamic>> recentSearch = [
+    {
+      "route": 'Perinthalmanna - Malappuram',
+      "time": '12pm - 1pm',
+      "fare": "₹10",
+      "regNo": "KL-11-AQ-9221"
+    },
+    {
+      "route": 'Perinthalmanna - Manjeri',
+      "time": '10am - 11am',
+      "fare": "₹20",
+      "regNo": "KL-11-AQ-9221"
+    },
+    {
+      "route": 'Manjeri - Malappuram',
+      "time": '3pm - 4pm',
+      "fare": "₹30",
+      "regNo": "KL-11-AQ-9221"
+    },
+    {
+      "route": 'Perinthalmanna - Kozhikode',
+      "time": '1pm - 2pm',
+      "fare": "₹40",
+      "regNo": "KL-11-AQ-9221"
+    },
+  ];
+
+  List<Map<String, dynamic>> ticketList = [
+    {
+      "route": 'Perinthalmanna - Malappuram',
+      "time": '12pm',
+      "fare": "₹10",
+      "regNo": "KL-11-AQ-9221"
+    },
+    {
+      "route": 'Perinthalmanna - Manjeri',
+      "time": '10am',
+      "fare": "₹20",
+      "regNo": "KL-11-AQ-9221"
+    },
+    {
+      "route": 'Manjeri - Malappuram',
+      "time": '3pm',
+      "fare": "₹30",
+      "regNo": "KL-11-AQ-9221"
+    },
+    {
+      "route": 'Perinthalmanna - Kozhikode',
+      "time": '1pm',
+      "fare": "₹40",
+      "regNo": "KL-11-AQ-9221"
+    },
+  ];
+
+  List<Map<String, dynamic>> notificationList = [
+    {
+      "route": 'Perinthalmanna - Malappuram',
+      "reachTime": '12pm',
+      "regNo": "KL-11-AQ-9221",
+      "status": "10 min late",
+    },
+    {
+      "route": 'Perinthalmanna - Malappuram',
+      "reachTime": '10am',
+      "regNo": "KL-11-AQ-9221",
+      "status": "on time",
+    },
+    {
+      "route": 'Perinthalmanna - Malappuram',
+      "reachTime": '11pm',
+      "regNo": "KL-11-AQ-9221",
+      "status": "5 min late",
+    },
+    {
+      "route": 'Perinthalmanna - Malappuram',
+      "reachTime": '3pm',
+      "regNo": "KL-11-AQ-9221",
+      "status": "15 min late",
+    },
+  ];
+
+  List<Map<String, dynamic>> busesList = [
+    {"name": 'Komban', "regNo": 'KL-11-AQ-9221'},
+    {"name": 'KSRTC', "regNo": 'KL-15-A-2255'},
+    {"name": 'Kallada Travels', "regNo": 'KL-10-AA-0021'},
+    {"name": 'SRS Travels', "regNo": 'KL-07-BB-0007'},
+    {"name": 'A1 Travels', "regNo": 'KL-02-AQ-1122'},
+    {"name": 'KSRTC', "regNo": 'KL-15-AB-7896'},
+  ];
+
+  bool isConditionsVerified = false;
+
+  void changeCondition(bool value) {
+    if (value == false) {
+      isConditionsVerified = false;
+    } else {
+      isConditionsVerified = true;
+    }
+    notifyListeners();
+  }
+
+  int currentIndex = 0;
+
+  List<Widget> pages = [
+    const UserHome(),
+    const UserTickets(),
+    const UserNotifications()
+  ];
+
+  void changeIndex(int index) {
+    currentIndex = index;
+    notifyListeners();
+  }
+
+  DateTime focusedDate = DateTime.now();
+
+  void changeFocusedDate(DateTime selectedDate) {
+    focusedDate = selectedDate;
+    notifyListeners();
+  }
+
+  double ratingStar = 0;
+
+  void changeRating(double rating) {
+    ratingStar = rating;
+    notifyListeners();
+  }
+
+  //////////////////////SIGNUP/////////////////////////
+  TextEditingController signupEmailController = TextEditingController();
+  TextEditingController signupuserNameController = TextEditingController();
+  TextEditingController signupPhoneController = TextEditingController();
+  TextEditingController signupPasswordController = TextEditingController();
+  TextEditingController signupConfrmPasswordController =
+      TextEditingController();
+}
