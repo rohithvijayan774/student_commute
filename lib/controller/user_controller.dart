@@ -1,8 +1,12 @@
+import 'package:cherry_toast/cherry_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:student_commute/model/user_model.dart';
 import 'package:student_commute/view/user/user_about_us.dart';
+import 'package:student_commute/view/user/user_bottom_navigation.dart';
 import 'package:student_commute/view/user/user_call_support.dart';
 import 'package:student_commute/view/user/user_change_password.dart';
 import 'package:student_commute/view/user/user_complaint_registration.dart';
@@ -154,10 +158,154 @@ class UserController extends ChangeNotifier {
   }
 
   //////////////////////SIGNUP/////////////////////////
+  final signUpKey = GlobalKey<FormState>();
   TextEditingController signupEmailController = TextEditingController();
   TextEditingController signupuserNameController = TextEditingController();
   TextEditingController signupPhoneController = TextEditingController();
   TextEditingController signupPasswordController = TextEditingController();
   TextEditingController signupConfrmPasswordController =
       TextEditingController();
+
+  UserModel? _userModel;
+  UserModel get userModel => _userModel!;
+
+  Future<void> createAccount(
+    String userid,
+    String userName,
+    String userEmail,
+    int userPhone,
+    context,
+  ) async {
+    try {
+      _userModel = UserModel(
+          userid: userid,
+          userName: userName,
+          userEmail: userEmail,
+          userPhone: userPhone);
+
+      await firebaseFirestore
+          .collection('users')
+          .doc(userid)
+          .set(_userModel!.toMap());
+
+      Navigator.of(context).pop();
+    } catch (e) {
+      CherryToast.error(
+        title: Text(
+          'Error!',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+        description: Text(
+          'Something went wrong, $e',
+          style: GoogleFonts.poppins(),
+        ),
+      ).show(context);
+    }
+  }
+
+  Future<void> signupUser(
+    String userName,
+    String userEmail,
+    int userPhone,
+    String userPassword,
+    context,
+  ) async {
+    try {
+      UserCredential userCredential =
+          await firebaseAuth.createUserWithEmailAndPassword(
+              email: userEmail, password: userPassword);
+      await userCredential.user!.sendEmailVerification();
+      CherryToast.success(
+        title: Text(
+          'Success',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+        description: Text(
+          'Verification email send to $userEmail. Please verify email before login.',
+          style: GoogleFonts.poppins(),
+        ),
+      ).show(context);
+      print("///////////////////${userCredential.user!.uid}");
+      await createAccount(
+          userCredential.user!.uid, userName, userEmail, userPhone, context);
+    } catch (e) {
+      CherryToast.error(
+        title: Text(
+          'Error!!!',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+        description: Text(
+          'Something went wrong, $e',
+          style: GoogleFonts.poppins(),
+        ),
+      ).show(context);
+    }
+  }
+
+  ///////////////////////////LOGIN///////////////////////////
+  ///
+  final loginKey = GlobalKey<FormState>();
+  TextEditingController userLoginEmail = TextEditingController();
+  TextEditingController userLoginPassword = TextEditingController();
+
+  Future<void> userLogin(
+    String userName,
+    String userPassword,
+    context,
+  ) async {
+    try {
+      UserCredential usercredential = await firebaseAuth
+          .signInWithEmailAndPassword(email: userName, password: userPassword);
+
+      if (usercredential.user!.emailVerified) {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const UserBottomNavigation(),
+            ),
+            (route) => false);
+      } else {
+        CherryToast.warning(
+          title: Text(
+            'Email Verification!',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+          ),
+          description: Text(
+            'Please verify your Email for login',
+            style: GoogleFonts.poppins(),
+          ),
+        ).show(context);
+      }
+    } catch (e) {
+      CherryToast.error(
+        title: Text(
+          'Error!!!',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+        ),
+        description: Text(
+          'Something went wrong, $e',
+          style: GoogleFonts.poppins(),
+        ),
+      ).show(context);
+    }
+  }
+
+  Future fetchUserData(context) async {
+    try {
+      await firebaseFirestore
+          .collection('users')
+          .doc(firebaseAuth.currentUser!.uid)
+          .get()
+          .then((DocumentSnapshot snapshot) {
+        _userModel = UserModel(
+          userid: snapshot['userid'],
+          userName: snapshot['userName'],
+          userEmail: snapshot['userEmail'],
+          userPhone: snapshot['userPhone'],
+          proPicURL: snapshot['proPicURL'],
+        );
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 }

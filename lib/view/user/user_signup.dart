@@ -13,23 +13,14 @@ class UserSignup extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    // final signupController =
-    //     Provider.of<UserController>(context, listen: false);
-
-    final signUpKey = GlobalKey<FormState>();
-    TextEditingController signupEmailController = TextEditingController();
-    TextEditingController signupuserNameController = TextEditingController();
-    TextEditingController signupPhoneController = TextEditingController();
-    TextEditingController signupPasswordController = TextEditingController();
-    TextEditingController signupConfrmPasswordController =
-        TextEditingController();
-
+    final signupController =
+        Provider.of<UserController>(context, listen: false);
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
           child: Form(
-            key: signUpKey,
+            key: signupController.signUpKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -53,7 +44,7 @@ class UserSignup extends StatelessWidget {
                   style: GoogleFonts.poppins(),
                 ),
                 TextFormField(
-                  controller: signupEmailController,
+                  controller: signupController.signupEmailController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "*required field";
@@ -74,7 +65,7 @@ class UserSignup extends StatelessWidget {
                   style: GoogleFonts.poppins(),
                 ),
                 TextFormField(
-                  controller: signupuserNameController,
+                  controller: signupController.signupuserNameController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "*required field";
@@ -95,7 +86,7 @@ class UserSignup extends StatelessWidget {
                   style: GoogleFonts.poppins(),
                 ),
                 TextFormField(
-                  controller: signupPhoneController,
+                  controller: signupController.signupPhoneController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "*required field";
@@ -117,7 +108,7 @@ class UserSignup extends StatelessWidget {
                   style: GoogleFonts.poppins(),
                 ),
                 TextFormField(
-                  controller: signupPasswordController,
+                  controller: signupController.signupPasswordController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "*required field";
@@ -140,11 +131,12 @@ class UserSignup extends StatelessWidget {
                   style: GoogleFonts.poppins(),
                 ),
                 TextFormField(
-                  controller: signupConfrmPasswordController,
+                  controller: signupController.signupConfrmPasswordController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "*required field";
-                    } else if (value != signupPasswordController.text) {
+                    } else if (value !=
+                        signupController.signupPasswordController.text) {
                       return "*Password didnot matches";
                     } else {
                       return null;
@@ -186,9 +178,17 @@ class UserSignup extends StatelessWidget {
                     width: size.width,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (signUpKey.currentState!.validate()) {
+                        if (buttonController.signUpKey.currentState!
+                            .validate()) {
                           if (buttonController.isConditionsVerified) {
-                            print('All verified');
+                            buttonController.signupUser(
+                              buttonController.signupuserNameController.text,
+                              buttonController.signupEmailController.text,
+                              int.parse(
+                                  buttonController.signupPhoneController.text),
+                              buttonController.signupPasswordController.text,
+                              context,
+                            );
                           } else {
                             CherryToast.info(
                               title: Text(
